@@ -71,7 +71,7 @@ exports.createOrUpdateUser = async (req, res) => {
       : undefined;
 
     const user = new User({
-      profilePhoto: `uploads/${filename}`, // save relative path
+      profilePhoto: `uploads/${filename}`,
       username,
       currentPassword: hashedPassword,
       newPassword: hashedNewPassword,
