@@ -42,7 +42,7 @@ exports.createOrUpdateUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid file format or size" });
     }
 
-    // Make sure the uploads folder exists
+   
     const uploadsDir = path.join(__dirname, "..", "uploads");
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir);
@@ -54,7 +54,7 @@ exports.createOrUpdateUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(currentPassword, 10);
 
-    // Add this check before hashing newPassword
+   
     if (newPassword) {
       const passwordRegex =
         /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
