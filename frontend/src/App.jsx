@@ -73,7 +73,7 @@ const App = () => {
         form
       );
       console.log(res.data);
-      setSubmitted(true); // ✅ show success message
+      setSubmitted(true); //  show success message
     } catch (err) {
       console.error(err);
       alert("Submission failed.");

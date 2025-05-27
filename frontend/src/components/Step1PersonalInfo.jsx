@@ -7,7 +7,7 @@ const Step1PersonalInfo = ({ formData, setFormData, errors, setErrors }) => {
 
   const baseURL = import.meta.env.VITE_API_URL;
 
-  // Check username availability from backend
+    
   const checkUsernameAvailability = async (username) => {
     try {
       const response = await fetch(
