@@ -18,21 +18,25 @@ app.use(morgan("combined"));
 // ✅ Correct allowed origins
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://multi-step-user-profile.vercel.app"
+  "https://multi-step-user-profile.vercel.app",
 ];
 
-// ✅ Working CORS middleware
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow curl or Postman
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow tools like Postman
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
+// Allow preflight requests for all routes
+app.options("*", cors());
 
 // ✅ Allow preflight requests for all routes
 app.options("*", cors());
@@ -45,12 +49,13 @@ app.use(fileUpload());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ✅ Connect MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("✅ MongoDB connected"))
-.catch((err) => console.error("❌ MongoDB error:", err));
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB error:", err));
 
 // ✅ API Routes
 const userRoutes = require("./routes/userRoutes");
