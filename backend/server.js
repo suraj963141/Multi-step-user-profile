@@ -10,61 +10,68 @@ const morgan = require("morgan");
 
 const app = express();
 
+// ✅ Security middlewares
 app.use(helmet());
-
-const allowedOrigins = [
-  process.env.CLIENT_URL || "https://multi-step-user-profile.vercel.app",
-  "http://localhost:5173"
-];
-
-app.use(cors({
-  origin: function(origin, callback) {
-   
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS policy does not allow access from origin: ${origin}`));
-    }
-  },
-  optionsSuccessStatus: 200, t
-}));
-
-app.use(express.json());
-app.use(fileUpload());
 app.use(compression());
 app.use(morgan("combined"));
 
+// ✅ Correct allowed origins
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://multi-step-user-profile.vercel.app"
+];
+
+// ✅ Working CORS middleware
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow curl or Postman
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
+
+// ✅ Allow preflight requests for all routes
+app.options("*", cors());
+
+// ✅ Body & file handling
+app.use(express.json());
+app.use(fileUpload());
+
+// ✅ Static file serving
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+// ✅ Connect MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("✅ MongoDB connected"))
+.catch((err) => console.error("❌ MongoDB error:", err));
 
-// Routes
+// ✅ API Routes
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
-app.use((req, res, next) => {
+// ✅ 404 handler
+app.use((req, res) => {
   res.status(404).json({ message: "API endpoint not found" });
 });
 
+// ✅ Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  if (err.message && err.message.includes("CORS")) {
+  console.error("💥 Server error:", err.message);
+  if (err.message.includes("CORS")) {
     return res.status(403).json({ message: err.message });
   }
   res.status(500).json({ message: "Internal Server Error" });
 });
 
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(
-    `Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`
-  );
+  console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -4,6 +4,8 @@ import Step2 from "./components/Step2ProfessionalDetails";
 import Step3 from "./components/Step3LocationDetails";
 import Step4 from "./components/Step4SubscriptionDetails";
 import axios from "axios";
+// Optional: toast
+// import { toast } from "react-hot-toast";
 
 const App = () => {
   const [step, setStep] = useState(1);
@@ -59,24 +61,35 @@ const App = () => {
   const handleSubmit = async () => {
     const form = new FormData();
 
+    // Append photo if exists
     if (formData.profilePhoto) {
       form.append("profilePhoto", formData.profilePhoto);
     }
 
+    // Append other fields
     Object.keys(formData).forEach((key) => {
-      if (key !== "profilePhoto") form.append(key, formData[key]);
+      if (key !== "profilePhoto") {
+        form.append(key, formData[key]);
+      }
     });
 
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/users/submit`,
-        form
+        form,
+        {
+          withCredentials: true, // ✅ Optional for cookies/auth
+          // Let browser set multipart/form-data boundary
+        }
       );
+
       console.log(res.data);
-      setSubmitted(true); //  show success message
+      setSubmitted(true);
+      // toast.success("Profile submitted successfully!");
     } catch (err) {
-      console.error(err);
+      console.error("Submission failed:", err);
       alert("Submission failed.");
+      // toast.error("Submission failed.");
     }
   };
 
@@ -93,7 +106,6 @@ const App = () => {
     );
   }
 
-  //  Preview
   const renderPreview = () => {
     return (
       <div className="max-w-2xl mx-auto bg-white p-8 rounded shadow">

@@ -27,7 +27,7 @@ const Step1PersonalInfo = ({ formData, setFormData, errors, setErrors }) => {
     }
   };
 
-  // Password validation rules
+  //  validation
   const validatePassword = (password) => {
     const lengthRegex = /.{8,}/;
     const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;

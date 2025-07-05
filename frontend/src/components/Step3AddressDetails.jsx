@@ -45,7 +45,7 @@ const Step3AddressDetails = ({ formData, setFormData, errors, setErrors, onNext,
     <div className="space-y-5">
       <h2 className="text-2xl font-semibold">Step 3: Address Details</h2>
 
-      <div>
+      <div> 
         <label className="block mb-1 font-medium">Address Line 1</label>
         <input
           type="text"
