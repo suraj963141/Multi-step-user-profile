@@ -8,56 +8,47 @@ const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
 
-// ✅ Security middlewares
-app.use(helmet());
-app.use(compression());
-app.use(morgan("combined"));
+const app = express(); // ✅ INIT FIRST
 
-// ✅ Correct allowed origins
-const app = express();
+// ✅ Middleware (AFTER app is initialized)
+app.use(helmet());
 
 const allowedOrigins = [
+  process.env.CLIENT_URL || "https://multi-step-user-profile.vercel.app",
   "http://localhost:5173",
-  "https://multi-step-user-profile.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
 
-// Allow preflight requests
-app.options("*", cors());
+app.options("*", cors()); // ✅ Enable preflight
 
-// ✅ Allow preflight requests for all routes
-app.options("*", cors());
-
-// ✅ Body & file handling
 app.use(express.json());
 app.use(fileUpload());
+app.use(compression());
+app.use(morgan("dev"));
 
-// ✅ Static file serving
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ✅ Connect MongoDB
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err));
+// ✅ Connect Mongo
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => {
+  console.log("MongoDB connected");
+}).catch((err) => {
+  console.error("MongoDB connection error:", err);
+});
 
-// ✅ API Routes
+// ✅ Routes
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
@@ -68,15 +59,14 @@ app.use((req, res) => {
 
 // ✅ Error handler
 app.use((err, req, res, next) => {
-  console.error("💥 Server error:", err.message);
+  console.error("Error:", err.message);
   if (err.message.includes("CORS")) {
     return res.status(403).json({ message: err.message });
   }
   res.status(500).json({ message: "Internal Server Error" });
 });
 
-// ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
