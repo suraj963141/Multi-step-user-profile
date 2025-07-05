@@ -8,14 +8,14 @@ const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
 
-const app = express();
-
 // ✅ Security middlewares
 app.use(helmet());
 app.use(compression());
 app.use(morgan("combined"));
 
 // ✅ Correct allowed origins
+const app = express();
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://multi-step-user-profile.vercel.app",
@@ -24,18 +24,18 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow tools like Postman
+      if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
+        callback(null, true);
       } else {
-        return callback(new Error("Not allowed by CORS"));
+        callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
   })
 );
 
-// Allow preflight requests for all routes
+// Allow preflight requests
 app.options("*", cors());
 
 // ✅ Allow preflight requests for all routes
